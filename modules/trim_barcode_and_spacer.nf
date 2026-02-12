@@ -20,7 +20,6 @@ process TRIM_BARCODE_AND_SPACER {
         -j ${task.cpus} \
         -u \${length_barcode_spacer} \
         -l \${length_minigene} \
-        --minimum-length \${length_minigene} \
         -o output/${id}.fastq.gz \
         ${fastq_file}
     """

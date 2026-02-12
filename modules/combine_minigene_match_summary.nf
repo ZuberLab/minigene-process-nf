@@ -10,9 +10,11 @@ process COMBINE_MINIGENE_MATCH_SUMMARY {
 
     output:
     path("minigene_match_summary_all.txt"), emit: combined_summaries
+    path("pair_valid_saturation.png"), emit: saturation_plot
 
     script:
     """
-    combine_minigene_match_summary.py ${summaries} > minigene_match_summary_all.txt
+    combine_minigene_match_summary.py --plot pair_valid_saturation.png ${summaries} \
+        > minigene_match_summary_all.txt
     """
 }

@@ -16,9 +16,12 @@ process MINIGENE_MATCH {
         --fastq ${fastq} \
         --design ${library} \
         --out-prefix ${sample_id} \
-        --max-bc-mismatches 2 \
-        --max-mg-mismatches ${params.minigene_mismatches} \
         --stop-len 3 \
-        --start-len 3
+        --start-len 3 \
+        --expected-stop TAA \
+        --expected-start ATG \
+        --max-bc-mismatches 2 \
+        --mg-mismatch-levels 0,1,2,4,6,9,12 \
+        --empty-plasmid-max-mismatches 9
     """
 }
