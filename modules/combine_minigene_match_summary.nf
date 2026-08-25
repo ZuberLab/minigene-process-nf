@@ -1,12 +1,11 @@
 process COMBINE_MINIGENE_MATCH_SUMMARY {
     tag { 'summarize' }
 
-    publishDir path: "${params.outputDir}/minigene_match/",
-               mode: 'copy',
-               overwrite: true
+    publishDir "${params.outputDir}/minigene_match/${library.baseName}", mode: 'copy', overwrite: true
 
     input:
     path(summaries)
+    path(library)
 
     output:
     path("minigene_match_summary_all.txt"), emit: combined_summaries

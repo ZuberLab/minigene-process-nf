@@ -1,12 +1,13 @@
 process MULTIQC {
-    tag { 'all' }   
+    tag { 'all' }
 
-    publishDir path: "${params.outputDir}",
+    publishDir path: "${params.outputDir}/counts/${library.baseName}",
                mode: 'copy',
                overwrite: true
 
     input:
     path (files)
+    path(library)
 
     output:
     path("*multiqc_report.html"), emit: multiqc_report

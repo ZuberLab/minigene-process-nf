@@ -28,7 +28,7 @@ library <- readr::read_tsv(library_file) %>%
   dplyr::select(id, group)
 
 names(count_files) <- stringr::str_replace(basename(count_files), ".txt", "")
-pattern <- paste(c(paste0(names(count_files), "#"), "\\.sam"), collapse = "|")
+pattern <- paste(c(paste0(names(count_files), "#"), "\\.marked\\.sam"), collapse = "|")
 
 lapply(count_files, read_featurecounts) %>%
   purrr::map(tidyr::gather, sample_name, count, -id) %>%

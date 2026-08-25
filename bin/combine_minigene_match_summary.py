@@ -174,22 +174,69 @@ def make_saturation_plot(sample_to_pct, mm_levels, plot_path):
         vals = [ys[i][j] for i in range(len(ys))]
         mean_y.append(sum(vals) / len(vals) if vals else 0.0)
 
-    plt.figure()
+    title = "Minigene matching saturation (pair_valid_pct vs mismatch allowance)"
+    xlabel = "Max allowed mismatches in minigene sequence"
+    ylabel = "pair_valid_pct (% of total reads)"
+
+    # Size the figure dynamically so long titles, labels, and the external legend fit.
+    # The base axes area stays readable, while extra width is added for long titles
+    # and for the legend placed to the right of the plotting pane.
+    base_width = 7.0
+    base_height = 4.8
+
+    title_extra_width = max(0.0, (len(title) - 65) * 0.055)
+
+    show_legend = len(labels) <= 15
+    legend_extra_width = 0.0
+
+    if show_legend:
+        legend_labels = labels + ["mean"]
+        longest_label = max((len(label) for label in legend_labels), default=0)
+        legend_extra_width = min(5.0, max(1.6, longest_label * 0.09 + 0.8))
+
+    fig_width = base_width + title_extra_width + legend_extra_width
+    fig_height = base_height + max(0.0, (len(x) - 10) * 0.05)
+
+    fig, ax = plt.subplots(
+        figsize=(fig_width, fig_height),
+        constrained_layout=True,
+    )
+
     for y, label in zip(ys, labels):
-        plt.plot(x, y, marker="o", label=label)
-    plt.plot(x, mean_y, marker="o", linestyle="--", linewidth=2, label="mean")
+        ax.plot(x, y, marker="o", label=label)
 
-    plt.xlabel("Max allowed mismatches in minigene sequence")
-    plt.ylabel("pair_valid_pct (% of total reads)")
-    plt.title("Minigene matching saturation (pair_valid_pct vs mismatch allowance)")
-    plt.xticks(x)
+    ax.plot(
+        x,
+        mean_y,
+        marker="o",
+        linestyle="--",
+        linewidth=2,
+        label="mean",
+    )
 
-    if len(labels) <= 15:
-        plt.legend()
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_title(title, pad=12)
+    ax.set_xticks(x)
 
-    plt.tight_layout()
-    plt.savefig(plot_path, dpi=200)
-    plt.close()
+    if show_legend:
+        ax.legend(
+            loc="center left",
+            bbox_to_anchor=(1.02, 0.5),
+            borderaxespad=0.0,
+            frameon=True,
+        )
+
+    # bbox_inches="tight" is a final safeguard that expands the saved image canvas
+    # if any title, tick label, axis label, or external legend would otherwise be clipped.
+    fig.savefig(
+        plot_path,
+        dpi=200,
+        bbox_inches="tight",
+        pad_inches=0.2,
+    )
+
+    plt.close(fig)
 
 
 def main():

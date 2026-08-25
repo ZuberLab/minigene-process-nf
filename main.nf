@@ -57,7 +57,11 @@ def helpMessage() {
 
         --minigene_length                   Number of nucleotides in minigene sequence. (default: 99)
 
-        --minigene_mismatches               Number of allowed mismatches in minigene sequence. (default: 9)
+        --minigene_alignment_length         Number of nucleotides in minigene barcode. (default: 8)
+
+        --minigene_alignment_score          Allowed penalty score in minigene sequence alignment. (default: -6)
+
+        --minigene_match                    If minigene should be matched to barcode. (default: true)
 
         --random_barcode_length             Length of random barcode. (default: 4)
 
@@ -98,7 +102,9 @@ log.info " spacer seq (nt)                                  : ${params.spacer_se
 log.info " spacer error rate                                : ${params.spacer_error_rate}"
 log.info " minigene barcode length                          : ${params.minigene_barcode_length}"
 log.info " minigene length (nt)                             : ${params.minigene_length}"
-log.info " mismatch allowance for minigene sequence         : ${params.minigene_mismatches}"
+log.info " minigene alignment length                        : ${params.minigene_alignment_length}"
+log.info " minigene alignment penalty score allowance       : ${params.minigene_alignment_score}"
+log.info " calc minigene barcode match stats                : ${params.minigene_match}"
 log.info " random barcode length                            : ${params.random_barcode_length}"
 log.info " =============================================================="
 log.info ""
@@ -187,10 +193,12 @@ workflow {
         .combine(ch_library)
 
     // match minigenes
-    ch_minigene_matched = MINIGENE_MATCH(ch_trimmed_spacer_combined_minigene)
+    if (params.minigene_match) {
+        ch_minigene_matched = MINIGENE_MATCH(ch_trimmed_spacer_combined_minigene)
 
-    // Combine minigene match stats
-    COMBINE_MINIGENE_MATCH_SUMMARY(ch_minigene_matched.minigene_counts_summary.collect())
+        // Combine minigene match stats
+        COMBINE_MINIGENE_MATCH_SUMMARY(ch_minigene_matched.minigene_counts_summary.collect(),(ch_library))
+    }
 
     // Process library
     ch_library_out = PROCESS_LIBRARY(ch_library)
@@ -219,7 +227,7 @@ workflow {
 
     //PCA
     if (params.pheno && file(params.pheno).exists()) {
-        PCA(ch_counts_pca.combine(ch_pheno))
+        PCA(ch_counts_pca.combine(ch_pheno), ch_library)
     } else {
         log.info "Skipping PCA: No phenotype file provided"
     }
@@ -240,7 +248,7 @@ workflow {
         .collect()
 
     // MultiQC
-    MULTIQC(ch_multiqqc_files)
+    MULTIQC(ch_multiqqc_files, ch_library)
 }
 
 // On completion
